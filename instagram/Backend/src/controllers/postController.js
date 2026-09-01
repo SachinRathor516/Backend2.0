@@ -9,8 +9,6 @@ const imagekit = new Imagekit({
 })
 
 async function createPostController (req , res) {
-    console.log(req.body ,req.file);
-
     const token = req.cookies.token
     
     if (!token) {
@@ -49,6 +47,87 @@ async function createPostController (req , res) {
 
 }
 
+async function getPostController(req ,res) {
+    const token = req.cookies.token
+
+    if (!token) {
+        return res.status(401).json({
+            message: 'token not provided , unauthorised access'
+        })
+    }
+
+    let decoded;
+
+    try {
+        decoded = jwt.verify(token , process.env.JWT_SECRET)
+    } catch (err) {
+        return res.status(401).json({
+            message: 'Invalid token , user not authorised'
+        })
+    }
+
+    const userId = decoded.id
+
+    const posts = await postModel.find({
+        userId: userId
+    })
+
+    res.status(200).json({
+        message: 'posts fetched successfully',
+        posts
+    })
+    
+    
+}
+
+async function getPostDetailsController(req ,res ) {
+    const token = req.cookies.token
+
+    if (!token) {
+        return res.status(401).json({
+            message: 'token not provided , unauthorised access'
+        })
+    }
+
+    let decoded;
+
+    try {
+        decoded = jwt.verify(token , process.env.JWT_SECRET)
+    } catch (err) {
+        return res.status(401).json({
+            message: 'invalid token , user not authorised'
+        })
+    }
+
+    const userId = decoded.id
+    const postId = req.params.postId
+
+    const post = await postModel.findById(postId)
+
+    if (!post) {
+        return res.status(404).json({
+            message: 'post not found'
+        })
+    }
+
+    const isValideUser = post.userId.toString() === userId
+
+    if (!isValideUser) {
+        return res.status(403).json({
+            message: 'forbidden content'
+        })
+    }
+
+    res.status(200).json({
+        message: 'post details fetched successfully',
+        post
+    })
+
+
+}
+
 module.exports = {
     createPostController,
+    getPostController,
+    getPostDetailsController,
 }
