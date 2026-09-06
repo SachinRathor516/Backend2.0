@@ -9,25 +9,7 @@ const imagekit = new Imagekit({
 })
 
 async function createPostController (req , res) {
-    const token = req.cookies.token
-    
-    if (!token) {
-        return res.status(401).json({
-            message: 'token not provided , unauthorised access'
-        })
-    }
-
-    let decoded = null
-    
-    try {
-          decoded = jwt.verify(token , process.env.JWT_SECRET)
-    } catch (err) {
-        return res.status(401).json({
-            message: 'Invalid token , user not authorised'
-        })
-    }
-    
-
+  
     const file = await imagekit.files.upload({
         file: await toFile(Buffer.from(req.file.buffer) , 'file'),
         fileName: 'test',
@@ -37,7 +19,7 @@ async function createPostController (req , res) {
     const post = await postModel.create({
         caption: req.body.caption,
         imgUrl: file.url,
-        userId: decoded.id
+        userId: req.user.id
     })
 
     res.status(201).json({
@@ -48,25 +30,9 @@ async function createPostController (req , res) {
 }
 
 async function getPostController(req ,res) {
-    const token = req.cookies.token
+   
 
-    if (!token) {
-        return res.status(401).json({
-            message: 'token not provided , unauthorised access'
-        })
-    }
-
-    let decoded;
-
-    try {
-        decoded = jwt.verify(token , process.env.JWT_SECRET)
-    } catch (err) {
-        return res.status(401).json({
-            message: 'Invalid token , user not authorised'
-        })
-    }
-
-    const userId = decoded.id
+    const userId = req.user.id
 
     const posts = await postModel.find({
         userId: userId
@@ -81,25 +47,9 @@ async function getPostController(req ,res) {
 }
 
 async function getPostDetailsController(req ,res ) {
-    const token = req.cookies.token
+   
 
-    if (!token) {
-        return res.status(401).json({
-            message: 'token not provided , unauthorised access'
-        })
-    }
-
-    let decoded;
-
-    try {
-        decoded = jwt.verify(token , process.env.JWT_SECRET)
-    } catch (err) {
-        return res.status(401).json({
-            message: 'invalid token , user not authorised'
-        })
-    }
-
-    const userId = decoded.id
+    const userId = req.user.id
     const postId = req.params.postId
 
     const post = await postModel.findById(postId)
