@@ -1,7 +1,5 @@
 const Imagekit = require('@imagekit/nodejs')
-const jwt = require('jsonwebtoken')
 const postModel = require('../models/postModel')
-const { post } = require('../app')
 
 
 
@@ -11,25 +9,9 @@ const imagekit = new Imagekit({
 })
 
 async function createPostController(req, res) {
-    const token = req.cookies.token
+   
 
-    if (!token) {
-        return res.status(404).json({
-            message: 'token not provided , unauthorised access'
-        })
-    }
-
-    let decoded;
-
-    try {
-        decoded = jwt.verify(token, process.env.JWT_SECRET)
-    } catch (err) {
-        return res.status(404).json({
-            message: 'Invalid token , user not authorised'
-        })
-    }
-
-    const userId = decoded.id
+    const userId = req.user.id
 
     const file = await imagekit.files.upload({
         file: await Imagekit.toFile(Buffer.from(req.file.buffer), 'file'),
@@ -53,26 +35,9 @@ async function createPostController(req, res) {
 
 
 async function getPostController(req , res) {
-    const token = req.cookies.token
+    
 
-    if (!token) {
-        return res.status(404).json({
-            message: 'token not provided , unauthorised access'
-        })
-    }
-
-    let decoded;
-
-    try {
-        decoded = jwt.verify(token , process.env.JWT_SECRET)
-    } catch (err) {
-        return res.status(404).json({
-            message: 'Invalide token , user not authorised'
-        })
-    }
-
-    const userId = decoded.id
-
+    const userId = req.user.id
     const posts = await postModel.find({user: userId})
 
     res.status(200).json({
@@ -83,25 +48,9 @@ async function getPostController(req , res) {
 
 
 async function getPostDetailsControllers(req , res) {
-    const token = req.cookies.token
+    
 
-    if (!token) {
-        return res.status(404).json({
-            message: 'token not provided , unauthorised access'
-        })
-    }
-
-    let decoded;
-
-    try {
-        decoded = jwt.verify(token , process.env.JWT_SECRET)
-    } catch (err) {
-        return res.status(404).json({
-            message: 'Invalid token , user not authorised'
-        })
-    }
-
-   const userId =  decoded.id
+   const userId =  req.user.id
    const postId = req.params.postId
 
    const post = await postModel.findById(postId)
