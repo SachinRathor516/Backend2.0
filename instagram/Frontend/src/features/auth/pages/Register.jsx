@@ -16,6 +16,8 @@ async function handleSubmit(e) {
     username,
     email,
     password
+  }, {
+    withCredentials: true
   })
 
   .then(res=>{
