@@ -35,7 +35,7 @@ async function handleSubmit(e) {
           type="password" 
           name='password' 
           placeholder='Enter password' />   
-          <button>Register</button>
+          <button className='button primary-btn'>Register</button>
         </form>
 
         <p>Already have an account ? <Link to= '/login'>Login</Link></p>
